@@ -1,0 +1,253 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calcul mental</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+     background:#F7F7FA;color:#25243B;padding:16px}
+h1{font-size:19px;margin-bottom:2px}
+.sous{color:#6B6A85;font-size:13px;margin-bottom:12px;line-height:1.5}
+.barre{display:flex;gap:14px;align-items:center;flex-wrap:wrap;
+       background:#fff;border:1px solid #E4E3EE;border-radius:10px;
+       padding:10px 14px;margin-bottom:10px}
+.barre label{font-size:13px;display:flex;align-items:center;gap:6px}
+input[type=search],select{font:inherit;font-size:13px;padding:5px 8px;
+       border:1px solid #D5D4E2;border-radius:6px;background:#fff}
+input[type=search]{min-width:200px}
+.legende{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:#4A4965;
+         margin-left:auto;align-items:center}
+.legende span{display:flex;align-items:center;gap:5px}
+.puce{width:13px;height:13px;border-radius:50%;display:inline-block}
+#info{background:#3C3489;color:#fff;border-radius:8px;padding:7px 14px;
+      font-size:13px;margin-bottom:10px;min-height:32px;display:flex;
+      align-items:center;gap:8px}
+#info.vide{background:#EEEDF8;color:#6B6A85}
+.cadre{background:#fff;border:1px solid #E4E3EE;border-radius:10px;
+       overflow:auto;max-height:74vh}
+table{border-collapse:separate;border-spacing:0;font-size:12px}
+th,td{padding:0;text-align:center;white-space:nowrap}
+th.theme{background:#EEEDF8;color:#3C3489;font-weight:700;font-size:12px;
+         padding:6px 10px;border-bottom:1px solid #E4E3EE;cursor:pointer;
+         position:sticky;top:0;z-index:20;user-select:none}
+th.theme.replie{opacity:.5}
+th.exo{cursor:help;background:#F6F5FC;color:#4A4965;font-weight:600;font-size:11px;
+       padding:4px 6px;border-bottom:1px solid #E4E3EE;
+       position:sticky;top:30px;z-index:20}
+th.coin{position:sticky;left:0;top:0;z-index:35;background:#EEEDF8;
+        text-align:left;padding:6px 10px;min-width:170px}
+th.coin2{position:sticky;left:0;top:30px;z-index:35;background:#F6F5FC;
+         text-align:left;padding:4px 12px}
+td.nom{position:sticky;left:0;z-index:10;background:#fff;text-align:left;
+       padding:5px 10px;font-weight:700;border-right:1px solid #E4E3EE;
+       min-width:170px}
+td.ligne{position:sticky;left:0;z-index:10;background:#fff;text-align:left;
+         padding:3px 10px;font-size:12px;color:#4A4965;font-weight:500;
+         border-right:1px solid #E4E3EE}
+td.c{padding:3px 6px}
+td.c::after{content:'';display:inline-block;width:14px;height:14px;
+            border-radius:50%;vertical-align:middle;background:#D8D8DC}
+td.n0.a::after{background:#D64545}
+td.n1::after{background:#D64545}td.n2::after{background:#F2A93B}td.n3::after{background:#A8D66D}td.n4::after{background:#2F5D0E}td.n5::after{background:#083808}
+td.c.a::after{box-shadow:0 0 0 1.5px rgba(60,52,137,.3)}
+/* Niveau 5 : la croix blanche des pages eleve, dessinee en CSS */
+td.n5{position:relative}
+td.n5::before{content:'';position:absolute;left:50%;top:50%;
+  width:8px;height:2px;background:#fff;transform:translate(-50%,-50%);
+  z-index:1;border-radius:1px}
+td.n5 span.croix{position:absolute;left:50%;top:50%;width:2px;height:8px;
+  background:#fff;transform:translate(-50%,-50%);z-index:1;border-radius:1px}
+tr.eleve td{border-top:2px solid #DEDCEC}
+tr.eleve.pair td,tr.suite.pair td{background:#F8F7FC}
+tr.eleve.pair td.nom,tr.suite.pair td.ligne{background:#F3F1FA}
+.ratio{display:block;font-weight:400;font-size:10px;color:#8A89A0;
+       margin-top:1px}
+tr.eleve:hover td,tr.suite:hover td{background:#FBFAFF}
+tr.eleve:hover td.nom,tr.suite:hover td.ligne{background:#F3F1FD}
+td.c.vise::after{outline:2px solid #3C3489;outline-offset:2px}
+tr.bilan td{background:#F6F5FC;font-weight:700;border-top:2px solid #E4E3EE;
+            font-size:11px;color:#3C3489;padding:6px 6px;
+            position:sticky;bottom:0;z-index:15}
+/* La case « Reussite de la classe » est figee dans les DEUX sens :
+   a gauche comme les autres noms, en bas comme sa ligne. */
+tr.bilan td.nom{position:sticky;left:0;bottom:0;z-index:40;
+  background:#EDEBF7;padding:5px 10px;font-size:11px;
+  border-right:1px solid #D9D6EA;border-top:2px solid #E4E3EE}
+/* Pas de pastille dans la ligne de synthese : elle porte des pourcentages */
+tr.bilan td.c::after,tr.bilan td.c::before{display:none}
+tr.bilan td.c span.croix{display:none}
+.taux{display:inline-block;min-width:28px}
+.detail{display:block;font-weight:400;font-size:10px;color:#8A89A0}
+/* Separation entre themes : nette mais discrete */
+th.theme,th.exo.debut,td.c.debut,td.tps.debut{border-left:2px solid #DCDAEA}
+th.exo.debut,td.c.debut{border-left:2px solid #E8E6F2}
+/* Colonnes de temps de travail */
+th.exo.temps{background:#EFF3FB;color:#2F4A7A}
+th.theme.temps{background:#E4EBF7;color:#2F4A7A;cursor:default}
+th.exo.temps.courante{background:#DCE6F7;font-weight:800}
+td.tps{padding:3px 8px;font-size:11px;font-weight:700;
+       border-left:1px solid #EDF1F8;background:#FBFCFE}
+td.tps.courante{background:#F2F6FD}
+tr.eleve.pair td.tps{background:#F6F8FC}
+tr.bilan td.tps{background:#EFF3FB;color:#2F4A7A}
+/* Colonne des noms : NOM a gauche, rapport aligne a droite.
+   Le flex est porte par un DIV interne : mis sur le <td> lui-meme, il
+   sortirait la cellule de la mise en page du tableau — elle cesserait
+   de s'etirer a la hauteur de sa ligne ET de rester figee au
+   defilement horizontal. */
+.dedans{display:flex;justify-content:space-between;align-items:baseline;
+  gap:14px;width:100%}
+.etiquette{text-align:left}
+/* Le nom mene au bilan de l'eleve, dans un nouvel onglet pour que le
+   tableau reste ouvert derriere. */
+a.lien-eleve{color:inherit;text-decoration:none;
+  border-bottom:1px dotted rgba(60,52,137,.4)}
+a.lien-eleve:hover{color:#3C3489;border-bottom-style:solid}
+.ratio{font-weight:400;font-size:11px;color:#8A89A0;text-align:right;
+  white-space:nowrap;flex-shrink:0}
+.picto{font-size:13px;margin-right:1px;cursor:help}
+/* Themes masques : boutons pour les faire revenir */
+.replies{background:#fff;border:1px solid #E4E3EE;border-radius:10px;
+  padding:8px 14px;margin-bottom:10px;display:flex;align-items:center;
+  gap:8px;flex-wrap:wrap}
+.replies-titre{font-size:12px;color:#6B6A85}
+.revenir{font:inherit;font-size:12px;cursor:pointer;background:#EEEDF8;
+  color:#3C3489;border:1px solid #D8D5EE;border-radius:14px;padding:3px 11px}
+.revenir:hover{background:#E2DFF6}
+#classes{display:flex;gap:10px}
+#classes label{font-size:13px;display:flex;align-items:center;gap:5px}
+.puce.croisee{position:relative}
+.puce.croisee::after{content:'+';position:absolute;inset:0;color:#fff;
+  font-size:11px;line-height:13px;text-align:center;font-weight:700}
+.rien{padding:36px;text-align:center;color:#6B6A85;line-height:1.7}
+/* ── Smartphone ────────────────────────────────────────────────── */
+@media (max-width:640px){
+  body{padding:8px}
+  h1{font-size:17px}
+  .sous{font-size:12px}
+  .barre{padding:8px 10px;gap:10px}
+  input[type=search]{min-width:0;flex:1}
+  .legende{margin-left:0;width:100%;gap:8px;font-size:11px}
+  .cadre{max-height:68vh;-webkit-overflow-scrolling:touch}
+  td.nom,th.coin{min-width:120px;padding:5px 7px;font-size:11px}
+  /* Sur telephone les noms longs mangeraient toute la largeur : on les
+     coupe a une dizaine de caracteres. Le nom complet reste dans
+     l'infobulle et le lien continue de fonctionner. */
+  .etiquette{display:inline-block;max-width:10ch;overflow:hidden;
+    text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
+  td.ligne,th.coin2{padding:3px 7px;font-size:11px}
+  .ratio{font-size:9px}
+  td.c{padding:3px 4px}
+  td.c::after{width:12px;height:12px}
+  th.exo{font-size:10px;padding:3px 4px}
+  th.theme{font-size:11px;padding:5px 7px}
+}
+
+
+</style><style id="replis"></style></head><body>
+<h1>Calcul mental</h1>
+<div class="sous">1 élèves · 77 exercices · une ligne <b>entraînement</b> (sans chronomètre) et une ligne <b>test</b> (chronométré) par élève<br>Les exercices attendus sont ceux des feuilles ouvertes dans WIMS — 1 ouverte(s) au 03/09/2026.</div>
+<div class="barre">
+  <input type="search" id="q" placeholder="Chercher un élève…">
+  <span id="classes"></span>
+  <span id="compte" style="font-size:12px;color:#6B6A85"></span>
+  <div class="legende"><span style="color:#D8D8DC"><i class="puce" style="background:#D8D8DC"></i>pas attendu</span><span style="color:#D64545"><i class="puce" style="background:#D64545"></i>non fait / pas réussi</span><span style="color:#F2A93B"><i class="puce" style="background:#F2A93B"></i>fragile</span><span style="color:#A8D66D"><i class="puce" style="background:#A8D66D"></i>début de maîtrise</span><span style="color:#2F5D0E"><i class="puce" style="background:#2F5D0E"></i>bonne maîtrise</span><span style="color:#083808"><i class="puce croisee" style="background:#083808"></i>très bonne maîtrise</span></div>
+</div>
+<div id="replies" class="replies" hidden>
+  <span class="replies-titre">Thèmes masqués :</span><span id="replies-liste"></span>
+</div>
+<div id="info" class="vide">Survolez une case pour en voir le détail.</div>
+<div class="cadre">
+<table><thead><tr><th class="coin">Élève</th><th class="theme o0 t1" data-g="o0" data-titre="Additions" colspan="22" title="Cliquer pour masquer ce thème">Additions</th><th class="theme o1 t0" data-g="o1" data-titre="Soustractions" colspan="8" title="Cliquer pour masquer ce thème">Soustractions</th><th class="theme o2 t0" data-g="o2" data-titre="Multiplications" colspan="35" title="Cliquer pour masquer ce thème">Multiplications</th><th class="theme o3 t0" data-g="o3" data-titre="Divisions" colspan="12" title="Cliquer pour masquer ce thème">Divisions</th></tr><tr><th class="coin2"></th><th class="exo o0 t1 debut" data-titre="Ajouter des unités avec des dizaines ; ou des dizaines avec des centaines...">A01</th><th class="exo o0 t1" data-titre="Ajouter 1 ou 2">A02</th><th class="exo o0 t1" data-titre="Ajouter 10 ; 100 ou 1000">A03</th><th class="exo o0 t1" data-titre="Ajouter sans retenue">A04</th><th class="exo o0 t0" data-titre="Trouver un complément à 10">A05</th><th class="exo o0 t0" data-titre="Connaître la table d&#x27;addition de 3">A06.3</th><th class="exo o0 t0" data-titre="Connaître la table d&#x27;addition de 4">A06.4</th><th class="exo o0 t0" data-titre="Connaître la table d&#x27;addition de 5">A06.5</th><th class="exo o0 t0" data-titre="Connaître la table d&#x27;addition de 6">A06.6</th><th class="exo o0 t0" data-titre="Connaître la table d&#x27;addition de 7">A06.7</th><th class="exo o0 t0" data-titre="Connaître la table d&#x27;addition de 8">A06.8</th><th class="exo o0 t0" data-titre="Connaître la table d&#x27;addition de 9">A06.9</th><th class="exo o0 t0" data-titre="Connaître les tables d&#x27;additions">A06</th><th class="exo o0 t0" data-titre="Ajouter 5">A07</th><th class="exo o0 t0" data-titre="Ajouter 9">A08</th><th class="exo o0 t0" data-titre="Ajouter un nombre à un chiffre">A09</th><th class="exo o0 t0" data-titre="Trouver un complément à 100">A10</th><th class="exo o0 t0" data-titre="Ajouter un nombre à deux chiffres">A11</th><th class="exo o0 t0" data-titre="Ajouter 9 ; 19 ; 29...">A12</th><th class="exo o0 t0" data-titre="Trouver un complément à 1000">A13</th><th class="exo o0 t0" data-titre="Ajouter des nombres décimaux sans retenue">A14</th><th class="exo o0 t0" data-titre="Ajouter des nombres décimaux">A15</th><th class="exo o1 t0 debut" data-titre="Enlever 1 ou 2">S01</th><th class="exo o1 t0" data-titre="Enlever 10 ; 100 ou 1000">S02</th><th class="exo o1 t0" data-titre="Enlever sans retenue">S03</th><th class="exo o1 t0" data-titre="Enlever un nombre à 1 chiffre à des dizaines entières">S04</th><th class="exo o1 t0" data-titre="Enlever 9">S05</th><th class="exo o1 t0" data-titre="Enlever 9 ; 19 ; 29...">S06</th><th class="exo o1 t0" data-titre="Enlever un nombre à un chiffre">S07</th><th class="exo o1 t0" data-titre="Enlever un nombre à deux chiffres">S08</th><th class="exo o2 t0 debut" data-titre="Connaître la table de multiplication de 2">M01.2</th><th class="exo o2 t0" data-titre="Connaître la table de multiplication de 3">M01.3</th><th class="exo o2 t0" data-titre="Connaître la table de multiplication de 4">M01.4</th><th class="exo o2 t0" data-titre="Connaître la table de multiplication de 5">M01.5</th><th class="exo o2 t0" data-titre="Connaître la table de multiplication de 6">M01.6</th><th class="exo o2 t0" data-titre="Connaître la table de multiplication de 7">M01.7</th><th class="exo o2 t0" data-titre="Connaître la table de multiplication de 8">M01.8</th><th class="exo o2 t0" data-titre="Connaître la table de multiplication de 9">M01.9</th><th class="exo o2 t0" data-titre="Connaître les tables de multiplication dans les deux sens">M01</th><th class="exo o2 t0" data-titre="Décomposer un nombre par une multiplication">M02</th><th class="exo o2 t0" data-titre="Connaître les doubles et moitiés">M03</th><th class="exo o2 t0" data-titre="Multiplier par 2">M04</th><th class="exo o2 t0" data-titre="Multiplier par 3">M05</th><th class="exo o2 t0" data-titre="Multiplier par 10 ; par 100 ou par 1000">M06</th><th class="exo o2 t0" data-titre="Multiplier par 4">M07</th><th class="exo o2 t0" data-titre="Multiplier par 5">M08</th><th class="exo o2 t0" data-titre="Multiplier par 6">M09</th><th class="exo o2 t0" data-titre="Multiplier par 8">M10</th><th class="exo o2 t0" data-titre="Multiplier par 9">M11</th><th class="exo o2 t0" data-titre="Multiplier par 11">M12</th><th class="exo o2 t0" data-titre="Multiplier par 12">M13</th><th class="exo o2 t0" data-titre="Multiplier par 16">M14</th><th class="exo o2 t0" data-titre="Multiplier par un multiple de 10">M15</th><th class="exo o2 t0" data-titre="Multiplier par le produit de deux nombres">M16</th><th class="exo o2 t0" data-titre="Multiplier par un multiple de 100">M17</th><th class="exo o2 t0" data-titre="Multiplier par 7">M18</th><th class="exo o2 t0" data-titre="Connaître les multiples de 25 et les décompositions multiplicatives de 60">M19</th><th class="exo o2 t0" data-titre="Multiplier deux nombres entiers à deux chiffres">M20</th><th class="exo o2 t0" data-titre="Multiplier par des centaines et des unités">M21</th><th class="exo o2 t0" data-titre="Multiplier par des centaines et des dizaines">M22</th><th class="exo o2 t0" data-titre="Multiplier un nombre décimal par 10">M23</th><th class="exo o2 t0" data-titre="Multiplier un nombre décimal par 2">M24</th><th class="exo o2 t0" data-titre="Multiplier un nombre décimal par 5 ou par 50">M25</th><th class="exo o2 t0" data-titre="Multiplier un nombre décimal par 0.1 ; par 0.01 ou par 0.001">M26</th><th class="exo o2 t0" data-titre="Multiplier deux nombres décimaux">M27</th><th class="exo o3 t0 debut" data-titre="Diviser par 2">D01</th><th class="exo o3 t0" data-titre="Diviser par 3">D02</th><th class="exo o3 t0" data-titre="Diviser par 10">D03</th><th class="exo o3 t0" data-titre="Diviser par 5">D04</th><th class="exo o3 t0" data-titre="Diviser par un nombre à 2 chiffres">D05</th><th class="exo o3 t0" data-titre="Diviser par 4">D06</th><th class="exo o3 t0" data-titre="Diviser par 6">D07</th><th class="exo o3 t0" data-titre="Diviser par 8">D08</th><th class="exo o3 t0" data-titre="Diviser par 9">D09</th><th class="exo o3 t0" data-titre="Diviser par un multiple de 10">D10</th><th class="exo o3 t0" data-titre="Faire une division euclidienne">D11</th><th class="exo o3 t0" data-titre="Calculer une division décimale par un entier plus petit que 10">D12</th></tr></thead><tbody><tr class="eleve" data-nom="test test test" data-famille="test test" data-classe="" data-affiche="test test" data-ligne="entraînement" data-reussis="0" data-attendus="4"><td class="nom"><div class="dedans"><a class="etiquette lien-eleve" href="test.html" target="_blank" rel="noopener" title="test test — ouvrir son bilan dans un nouvel onglet">test</a><span class="ratio"><span class="picto" title="entraînement">🏃</span> 0/4</span></div></td><td class="c o0 t1 n0 debut a"></td><td class="c o0 t1 n0 a"></td><td class="c o0 t1 n0 a"></td><td class="c o0 t1 n0 a"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o1 t0 n0 debut"></td><td class="c o1 t0 n0"></td><td class="c o1 t0 n0"></td><td class="c o1 t0 n0"></td><td class="c o1 t0 n0"></td><td class="c o1 t0 n0"></td><td class="c o1 t0 n0"></td><td class="c o1 t0 n0"></td><td class="c o2 t0 n0 debut"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o3 t0 n0 debut"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td></tr><tr class="suite" data-classe="" data-ligne="test chronométré"><td class="ligne"><div class="dedans"><a class="etiquette lien-eleve" href="test.html" target="_blank" rel="noopener" title="test">test</a><span class="ratio"><span class="picto" title="test chronométré">⏱</span> 0/4</span></div></td><td class="c o0 t1 n0 debut a"></td><td class="c o0 t1 n0 a"></td><td class="c o0 t1 n0 a"></td><td class="c o0 t1 n0 a"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o0 t0 n0"></td><td class="c o1 t0 n0 debut"></td><td class="c o1 t0 n0"></td><td class="c o1 t0 n0"></td><td class="c o1 t0 n0"></td><td class="c o1 t0 n0"></td><td class="c o1 t0 n0"></td><td class="c o1 t0 n0"></td><td class="c o1 t0 n0"></td><td class="c o2 t0 n0 debut"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o2 t0 n0"></td><td class="c o3 t0 n0 debut"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td><td class="c o3 t0 n0"></td></tr><tr class="bilan"><td class="nom">Réussite au test<span class="detail">sur 1 élèves</span></td><td class="c o0 t1 debut"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t1"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t1"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t1"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o0 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o1 t0 debut"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o1 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o1 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o1 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o1 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o1 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o1 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o1 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0 debut"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o2 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o3 t0 debut"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o3 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o3 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o3 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o3 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o3 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o3 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o3 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o3 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o3 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o3 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td><td class="c o3 t0"><span class="taux" style="color:#D64545">0%</span><span class="detail">0/1</span></td></tr></tbody></table>
+</div>
+<script>
+const tableau = document.querySelector('table');
+const info = document.getElementById('info');
+const NIVEAUX = {"0": "pas attendu", "1": "non fait / pas réussi", "2": "fragile", "3": "début de maîtrise", "4": "bonne maîtrise", "5": "très bonne maîtrise"};
+const COULEURS = {};
+
+function appliquer(){
+  const q = document.getElementById('q').value.trim().toLowerCase();
+  let vus = 0;
+
+  const actives = [...document.querySelectorAll('.fclasse:checked')].map(c => c.value);
+  document.querySelectorAll('tr.eleve').forEach(tr => {
+    const ok = (!q || (tr.dataset.nom || '').includes(q))
+            && (!tr.dataset.classe || actives.includes(tr.dataset.classe));
+    if (ok) vus++;
+    tr.style.display = ok ? '' : 'none';
+    const suite = tr.nextElementSibling;
+    if (suite && suite.classList.contains('suite'))
+      suite.style.display = ok ? '' : 'none';
+  });
+
+  document.getElementById('compte').textContent =
+    vus + (vus > 1 ? ' élèves affichés' : ' élève affiché');
+}
+
+
+// Masquer un thème : ses colonnes ET son en-tête disparaissent, et un
+// bouton apparaît en haut pour le faire revenir.
+function majReplis(){
+  const replies = [...document.querySelectorAll('th.theme.replie')];
+  document.getElementById('replis').textContent =
+    replies.map(x => '.' + x.dataset.g + '{display:none}').join(' ');
+  const liste = document.getElementById('replies-liste');
+  liste.innerHTML = '';
+  replies.forEach(x => {
+    const b = document.createElement('button');
+    b.className = 'revenir';
+    b.textContent = '↺ ' + x.dataset.titre;
+    b.title = 'Réafficher ce thème';
+    b.onclick = () => { x.classList.remove('replie'); majReplis(); };
+    liste.appendChild(b);
+  });
+  document.getElementById('replies').hidden = replies.length === 0;
+}
+document.querySelectorAll('th.theme').forEach(th => {
+  th.addEventListener('click', () => { th.classList.add('replie'); majReplis(); });
+});
+
+// Filtre par classe : une case à cocher par classe rencontrée.
+const zoneClasses = document.getElementById('classes');
+[...new Set([...document.querySelectorAll('tr.eleve')]
+    .map(tr => tr.dataset.classe).filter(Boolean))].sort().forEach(c => {
+  const l = document.createElement('label');
+  l.className = 'classe-' + (COULEURS[c] || 'x');
+  l.innerHTML = '<input type="checkbox" class="fclasse" value="' + c + '" checked> ' + c;
+  zoneClasses.appendChild(l);
+});
+zoneClasses.querySelectorAll('.fclasse')
+  .forEach(c => c.addEventListener('change', appliquer));
+
+// Au survol d'une case : l'intitulé complet de l'exercice, dans une
+// barre unique plutôt qu'une infobulle par cellule.
+let derniere = null;
+tableau.addEventListener('mouseover', e => {
+  // Une pastille, ou directement l'en-tete de la colonne : dans les deux
+  // cas on montre l'intitule complet de l'exercice.
+  const entete = e.target.closest('th.exo')
+      || (() => {
+           const td = e.target.closest('td.c');
+           if (!td) return null;
+           if (derniere) derniere.classList.remove('vise');
+           td.classList.add('vise');
+           derniere = td;
+           const i = [...td.parentElement.children].indexOf(td);
+           return tableau.tHead.rows[1].cells[i];
+         })();
+  if (!entete) return;
+  const code = entete.textContent.trim();
+  const intitule = entete.dataset.titre || '';
+  info.className = '';
+  info.textContent = intitule ? code + ' — ' + intitule : code;
+});
+tableau.addEventListener('mouseleave', () => {
+  if (derniere) derniere.classList.remove('vise');
+  info.className = 'vide';
+  info.textContent = 'Survolez une case pour en voir le détail.';
+});
+
+document.getElementById('q').addEventListener('input', appliquer);
+appliquer();
+</script>
+</body></html>

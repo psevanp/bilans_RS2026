@@ -1,0 +1,288 @@
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bilans élèves — 2026-09-03</title><style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;padding:10px;background:#fff}
+.header-titre{background:#5B2D8E;color:#fff;font-size:14px;font-weight:700;
+  padding:9px 14px;border-radius:10px 10px 0 0;text-align:center}
+.header-liens{background:#8462B3;padding:5px 14px;border-radius:0 0 10px 10px;
+  display:flex;justify-content:space-around;margin-bottom:12px}
+.header-liens a{color:#fff;text-decoration:none;font-size:12px;font-weight:600}
+.locked{color:rgba(255,255,255,0.4);font-size:12px;font-weight:600;
+  display:flex;align-items:center;gap:4px}
+table{border-collapse:separate;border-spacing:3px;width:100%;font-size:12px}
+th{background:#EEEDF8;color:#3C3489;padding:5px 7px;text-align:center;
+  border-radius:6px;font-weight:700;white-space:nowrap}
+th.label{min-width:160px;width:160px;background:transparent}
+td.label{padding:6px 8px;font-weight:700;font-size:11px;text-transform:uppercase;
+  letter-spacing:.04em;white-space:nowrap}
+td.entr-label{color:#1a6e3c}
+td.eval-label{color:#1e40af}
+td.cell{padding:4px;text-align:center;border-radius:7px}
+td.entr-cell{background:#F0FAF4}
+td.eval-cell{background:#EEF2FF}
+.gap{height:3px}
+.temps-wrap{border-radius:10px;overflow:hidden;border:1.5px solid #2F5D0E;margin-bottom:10px}
+.temps-titre{background:#2F5D0E;color:#fff;font-size:13px;font-weight:700;
+  padding:8px 14px;text-align:center;letter-spacing:.03em}
+.temps-body{background:#f6fbf2;padding:9px 11px}
+/* Une ligne par periode : intitule, duree, appreciation, alignes */
+.tps-ligne{display:grid;grid-template-columns:1fr auto 1fr;align-items:baseline;
+  gap:12px;padding:6px 12px;border-radius:7px;margin-bottom:4px}
+.tps-ligne .tps-quand{text-align:left}
+.tps-ligne .tps-min{text-align:center;font-weight:700;white-space:nowrap}
+.tps-ligne .tps-com{text-align:right;font-style:italic;color:#666;
+  font-size:12px}
+/* Trois niveaux de mise en valeur. L'intitule de la periode suit la
+   meme graduation que la duree : c'est ce qui rend la lecture coherente. */
+.tps-ligne-forte{background:#fff;border:1.5px solid #7ab648}
+.tps-ligne-forte .tps-quand{font-size:15px;font-weight:700;color:#254D0B}
+.tps-ligne-forte .tps-min{font-size:20px}
+.tps-ligne-forte .tps-com{font-size:12px}
+
+.tps-ligne-discrete{background:transparent;border:1px solid #e6f1da;
+  padding:4px 12px}
+.tps-ligne-discrete .tps-quand{font-size:12.5px;font-weight:600;color:#5F7A47}
+.tps-ligne-discrete .tps-min{font-size:13px}
+.tps-ligne-discrete .tps-com{font-size:11px}
+.tps-histo-titre{font-size:11px;font-weight:700;color:#2F5D0E;
+  text-transform:uppercase;letter-spacing:.06em;text-align:center;
+  margin:9px 0 5px;padding-top:8px;border-top:1px dashed #cfe4b8}
+.tps-maj{font-size:10px;color:#8aa176;text-align:right;margin-top:6px}
+.temps-cols{display:flex;flex-direction:column;gap:6px}
+.temps-col{background:#fff;border-radius:7px;padding:7px 12px;
+  border:1px solid #d4edc1;display:flex;align-items:baseline;
+  gap:10px;flex-wrap:wrap}
+.temps-col .temps-val{margin:0;font-size:17px}
+.temps-col .temps-note{margin:0}
+.temps-col-label{font-size:11px;font-weight:700;color:#2F5D0E;text-transform:uppercase;letter-spacing:.04em;min-width:140px;text-align:left}
+.temps-col-date{font-size:11px;color:#777}
+.temps-val{font-size:15px;font-weight:700;margin:3px 0}
+.temps-com{font-size:11px;color:#666;font-style:italic;margin-left:auto}
+.temps-note{font-size:10px;color:#aaa;margin-top:3px}
+.val-ok{color:#2F5D0E}
+.val-bad{color:#D64545}
+.val-mid{color:#F2A93B}
+
+.page{max-width:900px;margin:0 auto;padding:16px}
+.eleve-card{background:white;border-radius:12px;padding:20px;margin-bottom:24px;
+  box-shadow:0 2px 8px rgba(0,0,0,.1);page-break-after:always}
+.eleve-nom{display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;font-size:20px;font-weight:bold;margin-bottom:14px;
+  border-bottom:2px solid #e0e0e0;padding-bottom:8px}
+.theme-wrap{margin-bottom:26px}
+tr.bandeau th{background:#5B2D8E;color:#fff;font-size:12px;font-weight:700;
+  padding:7px 7px;white-space:nowrap}
+/* Le titre du theme domine la ligne : c'est le repere de lecture */
+tr.bandeau th.titre-feuille{text-align:left;padding-left:14px;font-size:16px;
+  font-weight:800;border-radius:8px 0 0 8px;letter-spacing:.01em;
+  min-width:170px;border-left:5px solid #C9A5F0}
+tr.bandeau th.code{font-weight:600;font-size:11px;color:#E7DFF6}
+tr.bandeau th:last-child{border-radius:0 8px 8px 0}
+table.avec-bandeau{border-spacing:3px 2px}
+/* Historique des periodes, au bas du cadre vert */
+/* Historique : sous une ligne discrete, titre centre puis les semaines */
+.temps-resume{margin-top:9px;padding-top:8px;border-top:1px dashed #cfe4b8}
+.temps-resume-titre{font-size:11px;font-weight:700;color:#2F5D0E;
+  text-transform:uppercase;letter-spacing:.06em;text-align:center;
+  margin-bottom:6px}
+.temps-resume-cases{display:flex;gap:6px;justify-content:center;
+  flex-wrap:wrap}
+.tps-case{display:flex;flex-direction:column;align-items:center;
+  background:#fff;border:1px solid #d4edc1;border-radius:8px;
+  padding:3px 9px;color:#2F5D0E;line-height:1.25;min-width:52px}
+.tps-case b{font-size:15px}
+.tps-courante{background:#eaf6de;border-color:#9dcd77}
+.tps-quand{font-size:10px;color:#6f8a56}
+.tps-encours{color:#2F5D0E;font-weight:700}
+.compteurs{display:flex;gap:12px;margin-bottom:12px}
+.compteur{flex:1;border-radius:10px;padding:9px 14px;display:flex;
+  flex-direction:column;align-items:center;gap:1px;border:1.5px solid}
+.compteur.entr{background:#F0FAF4;border-color:#A8D66D;color:#2F5D0E}
+.compteur.eval{background:#EEF2FF;border-color:#A9B6E8;color:#3C3489}
+.compteur-titre{font-size:11px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.05em}
+.compteur-val{font-size:21px;font-weight:700;line-height:1.15}
+.compteur-val .sur{font-size:14px;font-weight:400;opacity:.65}
+.compteur-part{font-size:11px;opacity:.8}
+.bloc-wims{margin-left:auto;display:flex;align-items:center;gap:10px;
+  flex-wrap:wrap}
+.rappel-ident{font-size:12px;font-weight:400;color:#5B2D8E;
+  background:#F3EDFB;border:1px solid #E0D2F5;border-radius:14px;
+  padding:4px 11px;white-space:nowrap}
+.rappel-ident b{font-weight:700;letter-spacing:.02em}
+.lien-wims{background:#5B2D8E;color:#fff;font-size:12px;
+  font-weight:600;text-decoration:none;padding:6px 13px;border-radius:16px;
+  white-space:nowrap}
+.lien-wims:hover{background:#4A2475}
+.maj{font-size:11px;color:#8A89A0;margin:-4px 0 12px}
+/* Bulle affichee au clic sur une pastille ou un code d'exercice */
+#bulle{position:fixed;z-index:99;background:#2B2A42;color:#fff;
+  font-size:13px;line-height:1.35;padding:8px 13px;border-radius:9px;
+  max-width:290px;box-shadow:0 6px 20px rgba(0,0,0,.22);
+  opacity:0;transform:translateY(4px);transition:opacity .15s,transform .15s;
+  pointer-events:none}
+#bulle.visible{opacity:1;transform:translateY(0)}
+#bulle b{display:block;font-size:12px;color:#C9B6EE;margin-bottom:2px}
+td.cell[data-titre]:not([data-titre=""]),
+th.code[data-titre]:not([data-titre=""]){cursor:pointer}
+.classe-eleve{font-size:15px;font-weight:400;color:#8462B3;margin-left:7px}
+.tps-maj{font-size:10px;color:#8aa176;margin-left:auto}
+.nav{background:#1a1a2e;color:white;padding:10px 16px;position:sticky;top:0;
+  z-index:10;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.nav a{color:#93c5fd;font-size:12px;text-decoration:none;white-space:nowrap}
+.nav-titre{color:#aaa;font-size:13px;font-weight:bold;margin-right:6px}
+/* ── Smartphone ────────────────────────────────────────────────── */
+@media (max-width:640px){
+  .page{padding:8px}
+  .eleve-card{padding:12px 10px}
+  .eleve-nom{font-size:18px;gap:8px}
+  .lien-wims{margin-left:0;width:100%;text-align:center}
+  .compteurs{flex-direction:column;gap:8px}
+  .temps-cols{flex-direction:column}
+  .temps-resume{gap:6px}
+  .tps-case{min-width:46px;padding:2px 7px}
+  .tps-maj{margin-left:0;width:100%}
+  /* Les tableaux de themes defilent horizontalement plutot que de
+     deborder : la page reste lisible sur un ecran etroit. */
+  .theme-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  tr.bandeau th.titre-feuille{font-size:14px;min-width:120px}
+  td.label{min-width:110px;width:110px;font-size:10px}
+  th.label{min-width:110px;width:110px}
+}
+#bulle{display:none}
+@media print{.nav{display:none}.eleve-card{box-shadow:none;break-after:page}body{background:white}}
+</style></head><body><div class="nav"><span class="nav-titre">Élèves :</span><a href="#eleve-test">test</a></div><div class="page"><div class="eleve-card" id="eleve-test"><div class="eleve-nom"><span class="ident-eleve">test<span class="classe-eleve">(6e2)</span></span><span class="bloc-wims"><span class="rappel-ident">identifiant&nbsp;: <b>test</b></span><a class="lien-wims" href="https://wims.univ-amu.fr/WIMs/wims.cgi?&+lang=fr&+module=adm%2Fclass%2Fclasses&+type=authparticipant&+class=1866219&+subclass=yes" target="_blank" rel="noopener">Se connecter à WIMS &#8599;</a></span></div><div class="maj">Mis à jour le 03/09/2026 à 08h48</div><div class="temps-wrap"><div class="temps-titre">&#9201; Temps de travail à la maison</div><div class="temps-body"><div class="tps-ligne tps-ligne-forte"><span class="tps-quand">Semaine du 31 août <span class="tps-encours">(non terminée)</span></span><span class="tps-min val-bad">0 min</span><span class="tps-com">travail non fait</span></div></div></div><div class="compteurs"><div class="compteur entr"><span class="compteur-titre">Entraînements</span><span class="compteur-val">0<span class="sur">/0</span></span><span class="compteur-part">0 % de réussite</span></div><div class="compteur eval"><span class="compteur-titre">Évaluations</span><span class="compteur-val">0<span class="sur">/0</span></span><span class="compteur-part">0 % de réussite</span></div></div><div class="theme-wrap"><table class="avec-bandeau">
+<thead><tr class="bandeau"><th class="titre-feuille">\titres[\num_sheet]</th><th class="code" data-exo="N1" data-titre="Multiplier un nombre entier par 10 par 100 par 1000">N1</th><th class="code" data-exo="N2" data-titre="Trouver le nombre de paquets de 10 de 100 ou de 1000 dans un nombre">N2</th><th class="code" data-exo="N3" data-titre="Écrire un nombre entier en chiffres">N3</th><th class="code" data-exo="N4" data-titre="Écrire un nombre entier en lettres">N4</th><th class="code" data-exo="N5" data-titre="Comparer des nombres entiers">N5</th><th class="code" data-exo="N6" data-titre="Repérer l'abscisse d'un nombre entier sur la ligne numérique">N6</th><th class="code" data-exo="N7" data-titre="Placer un nombre entier sur la ligne numérique">N7</th><th class="code" data-exo="N8" data-titre="Établir des liens entre unités dizaines centaines millions milliards">N8</th></tr></thead>
+<tbody>
+<tr><td class="label entr-label">🏃 entraînements</td><td class="cell entr-cell" data-exo="N1" data-titre="Multiplier un nombre entier par 10 par 100 par 1000"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N2" data-titre="Trouver le nombre de paquets de 10 de 100 ou de 1000 dans un nombre"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N3" data-titre="Écrire un nombre entier en chiffres"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N4" data-titre="Écrire un nombre entier en lettres"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N5" data-titre="Comparer des nombres entiers"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N6" data-titre="Repérer l'abscisse d'un nombre entier sur la ligne numérique"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N7" data-titre="Placer un nombre entier sur la ligne numérique"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N8" data-titre="Établir des liens entre unités dizaines centaines millions milliards"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+<tr class="gap"><td colspan="9"></td></tr>
+<tr><td class="label eval-label">🏆 évaluations</td><td class="cell eval-cell" data-exo="N1" data-titre="Multiplier un nombre entier par 10 par 100 par 1000"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N2" data-titre="Trouver le nombre de paquets de 10 de 100 ou de 1000 dans un nombre"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N3" data-titre="Écrire un nombre entier en chiffres"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N4" data-titre="Écrire un nombre entier en lettres"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N5" data-titre="Comparer des nombres entiers"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N6" data-titre="Repérer l'abscisse d'un nombre entier sur la ligne numérique"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N7" data-titre="Placer un nombre entier sur la ligne numérique"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N8" data-titre="Établir des liens entre unités dizaines centaines millions milliards"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+</tbody>
+</table>
+</div><div class="theme-wrap"><table class="avec-bandeau">
+<thead><tr class="bandeau"><th class="titre-feuille">\titres[\num_sheet]</th><th class="code" data-exo="N9" data-titre="Utiliser des représentations de fractions">N9</th><th class="code" data-exo="N10" data-titre="Écrire un nombre entier comme une fraction">N10</th><th class="code" data-exo="N11" data-titre="Lire une fraction">N11</th><th class="code" data-exo="N12" data-titre="Prendre la fraction d’une quantité">N12</th><th class="code" data-exo="N13" data-titre="Placer une fraction sur la ligne numérique">N13</th><th class="code" data-exo="N14" data-titre="Écrire une fraction comme somme d'un entier et d'une fraction inférieure à 1">N14</th><th class="code" data-exo="N15" data-titre="Encadrer une fraction">N15</th><th class="code" data-exo="N16" data-titre="Comparer des fractions">N16</th><th class="code" data-exo="N17" data-titre="Additionner et soustraire des fractions">N17</th><th class="code" data-exo="N18" data-titre="Multiplier une fraction par un nombre entier">N18</th><th class="code" data-exo="N19" data-titre="Établir des égalités de fractions">N19</th><th class="code" data-exo="N20" data-titre="Exprimer un quotient">N20</th></tr></thead>
+<tbody>
+<tr><td class="label entr-label">🏃 entraînements</td><td class="cell entr-cell" data-exo="N9" data-titre="Utiliser des représentations de fractions"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N10" data-titre="Écrire un nombre entier comme une fraction"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N11" data-titre="Lire une fraction"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N12" data-titre="Prendre la fraction d’une quantité"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N13" data-titre="Placer une fraction sur la ligne numérique"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N14" data-titre="Écrire une fraction comme somme d'un entier et d'une fraction inférieure à 1"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N15" data-titre="Encadrer une fraction"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N16" data-titre="Comparer des fractions"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N17" data-titre="Additionner et soustraire des fractions"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N18" data-titre="Multiplier une fraction par un nombre entier"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N19" data-titre="Établir des égalités de fractions"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N20" data-titre="Exprimer un quotient"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+<tr class="gap"><td colspan="13"></td></tr>
+<tr><td class="label eval-label">🏆 évaluations</td><td class="cell eval-cell" data-exo="N9" data-titre="Utiliser des représentations de fractions"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N10" data-titre="Écrire un nombre entier comme une fraction"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N11" data-titre="Lire une fraction"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N12" data-titre="Prendre la fraction d’une quantité"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N13" data-titre="Placer une fraction sur la ligne numérique"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N14" data-titre="Écrire une fraction comme somme d'un entier et d'une fraction inférieure à 1"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N15" data-titre="Encadrer une fraction"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N16" data-titre="Comparer des fractions"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N17" data-titre="Additionner et soustraire des fractions"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N18" data-titre="Multiplier une fraction par un nombre entier"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N19" data-titre="Établir des égalités de fractions"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N20" data-titre="Exprimer un quotient"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+</tbody>
+</table>
+</div><div class="theme-wrap"><table class="avec-bandeau">
+<thead><tr class="bandeau"><th class="titre-feuille">\titres[\num_sheet]</th><th class="code" data-exo="N21" data-titre="Écrire un nombre entier comme une fraction décimale">N21</th><th class="code" data-exo="N22" data-titre="Placer une fraction décimale sur la ligne numérique">N22</th><th class="code" data-exo="N23" data-titre="Transformer une fraction décimale">N23</th><th class="code" data-exo="N24" data-titre="Comparer encadrer intercaler des fractions décimales">N24</th><th class="code" data-exo="N25" data-titre="Additionner ou soustraire des fractions décimales">N25</th><th class="code" data-exo="N26" data-titre="Donner l'écriture décimale d'une somme de fractions décimales">N26</th><th class="code" data-exo="N27" data-titre="Placer un nombre décimal sur la ligne numérique">N27</th><th class="code" data-exo="N28" data-titre="Comparer encadrer intercaler des nombres décimaux">N28</th><th class="code" data-exo="N29" data-titre="Additionner ou soustraire des nombres décimaux">N29</th><th class="code" data-exo="N30" data-titre="Reconnaître un nombre décimal">N30</th></tr></thead>
+<tbody>
+<tr><td class="label entr-label">🏃 entraînements</td><td class="cell entr-cell" data-exo="N21" data-titre="Écrire un nombre entier comme une fraction décimale"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N22" data-titre="Placer une fraction décimale sur la ligne numérique"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N23" data-titre="Transformer une fraction décimale"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N24" data-titre="Comparer encadrer intercaler des fractions décimales"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N25" data-titre="Additionner ou soustraire des fractions décimales"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N26" data-titre="Donner l'écriture décimale d'une somme de fractions décimales"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N27" data-titre="Placer un nombre décimal sur la ligne numérique"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N28" data-titre="Comparer encadrer intercaler des nombres décimaux"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N29" data-titre="Additionner ou soustraire des nombres décimaux"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="N30" data-titre="Reconnaître un nombre décimal"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+<tr class="gap"><td colspan="11"></td></tr>
+<tr><td class="label eval-label">🏆 évaluations</td><td class="cell eval-cell" data-exo="N21" data-titre="Écrire un nombre entier comme une fraction décimale"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N22" data-titre="Placer une fraction décimale sur la ligne numérique"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N23" data-titre="Transformer une fraction décimale"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N24" data-titre="Comparer encadrer intercaler des fractions décimales"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N25" data-titre="Additionner ou soustraire des fractions décimales"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N26" data-titre="Donner l'écriture décimale d'une somme de fractions décimales"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N27" data-titre="Placer un nombre décimal sur la ligne numérique"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N28" data-titre="Comparer encadrer intercaler des nombres décimaux"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N29" data-titre="Additionner ou soustraire des nombres décimaux"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="N30" data-titre="Reconnaître un nombre décimal"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+</tbody>
+</table>
+</div><div class="theme-wrap"><table class="avec-bandeau">
+<thead><tr class="bandeau"><th class="titre-feuille">\titres[\num_sheet]</th><th class="code" data-exo="G2.b1" data-titre="Reproduire un dessin géométrique : identifier les objets mathématiques (milieu segment)">G2.b1</th><th class="code" data-exo="G2.b2" data-titre="Reproduire un dessin géométrique : identifier les objets mathématiques (centre cercle)">G2.b2</th><th class="code" data-exo="G2.c1" data-titre="Reproduire un dessin géométrique : identifier les points qui ne sont pas accessibles (alignements)">G2.c1</th><th class="code" data-exo="G2.c2" data-titre="Reproduire un dessin géométrique : identifier les points qui ne sont pas accessibles">G2.c2</th><th class="code" data-exo="G3" data-titre="Utiliser un vocabulaire savant en géométrie">G3</th><th class="code" data-exo="G4" data-titre="Rédiger un programme de construction">G4</th><th class="code" data-exo="G5" data-titre="Suivre un programme de construction">G5</th><th class="code" data-exo="G6" data-titre="Connaître les propriétés des figures usuelles">G6</th><th class="code" data-exo="G7" data-titre="Caractériser le cercle">G7</th></tr></thead>
+<tbody>
+<tr><td class="label entr-label">🏃 entraînements</td><td class="cell entr-cell" data-exo="G2.b1" data-titre="Reproduire un dessin géométrique : identifier les objets mathématiques (milieu segment)"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="G2.b2" data-titre="Reproduire un dessin géométrique : identifier les objets mathématiques (centre cercle)"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="G2.c1" data-titre="Reproduire un dessin géométrique : identifier les points qui ne sont pas accessibles (alignements)"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="G2.c2" data-titre="Reproduire un dessin géométrique : identifier les points qui ne sont pas accessibles"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="G3" data-titre="Utiliser un vocabulaire savant en géométrie"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="G4" data-titre="Rédiger un programme de construction"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="G5" data-titre="Suivre un programme de construction"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="G6" data-titre="Connaître les propriétés des figures usuelles"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="G7" data-titre="Caractériser le cercle"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+<tr class="gap"><td colspan="10"></td></tr>
+<tr><td class="label eval-label">🏆 évaluations</td><td class="cell eval-cell" data-exo="G2.b1" data-titre="Reproduire un dessin géométrique : identifier les objets mathématiques (milieu segment)"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="G2.b2" data-titre="Reproduire un dessin géométrique : identifier les objets mathématiques (centre cercle)"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="G2.c1" data-titre="Reproduire un dessin géométrique : identifier les points qui ne sont pas accessibles (alignements)"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="G2.c2" data-titre="Reproduire un dessin géométrique : identifier les points qui ne sont pas accessibles"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="G3" data-titre="Utiliser un vocabulaire savant en géométrie"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="G4" data-titre="Rédiger un programme de construction"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="G5" data-titre="Suivre un programme de construction"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="G6" data-titre="Connaître les propriétés des figures usuelles"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="G7" data-titre="Caractériser le cercle"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+</tbody>
+</table>
+</div><div class="theme-wrap"><table class="avec-bandeau">
+<thead><tr class="bandeau"><th class="titre-feuille">\titres[\num_sheet]</th><th class="code" data-exo="G9" data-titre="Construire un triangle en connaissant les mesures de ses côtés">G9</th><th class="code" data-exo="G10" data-titre="Construire la médiatrice d’un segment">G10</th><th class="code" data-exo="G12" data-titre="Construire le cercle circonscrit à un triangle">G12</th><th class="code" data-exo="G22" data-titre="Construire un triangle connaissant des longueurs et des angles">G22</th><th class="code" data-exo="G23" data-titre="Calculer des angles dans un triangle">G23</th></tr></thead>
+<tbody>
+<tr><td class="label entr-label">🏃 entraînements</td><td class="cell entr-cell" data-exo="G9" data-titre="Construire un triangle en connaissant les mesures de ses côtés"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="G10" data-titre="Construire la médiatrice d’un segment"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="G12" data-titre="Construire le cercle circonscrit à un triangle"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="G22" data-titre="Construire un triangle connaissant des longueurs et des angles"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="G23" data-titre="Calculer des angles dans un triangle"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+<tr class="gap"><td colspan="6"></td></tr>
+<tr><td class="label eval-label">🏆 évaluations</td><td class="cell eval-cell" data-exo="G9" data-titre="Construire un triangle en connaissant les mesures de ses côtés"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="G10" data-titre="Construire la médiatrice d’un segment"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="G12" data-titre="Construire le cercle circonscrit à un triangle"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="G22" data-titre="Construire un triangle connaissant des longueurs et des angles"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="G23" data-titre="Calculer des angles dans un triangle"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+</tbody>
+</table>
+</div><div class="theme-wrap"><table class="avec-bandeau">
+<thead><tr class="bandeau"><th class="titre-feuille">\titres[\num_sheet]</th><th class="code" data-exo="G19" data-titre="Tracer l’'axe de symétrie d’une figure">G19</th><th class="code" data-exo="G20" data-titre="Compléter une figure par symétrie axiale">G20</th><th class="code" data-exo="G21" data-titre="Transformer une figure par symétrie axiale">G21</th></tr></thead>
+<tbody>
+<tr><td class="label entr-label">🏃 entraînements</td><td class="cell entr-cell" data-exo="G19" data-titre="Tracer l’'axe de symétrie d’une figure"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="G20" data-titre="Compléter une figure par symétrie axiale"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="G21" data-titre="Transformer une figure par symétrie axiale"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+<tr class="gap"><td colspan="4"></td></tr>
+<tr><td class="label eval-label">🏆 évaluations</td><td class="cell eval-cell" data-exo="G19" data-titre="Tracer l’'axe de symétrie d’une figure"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="G20" data-titre="Compléter une figure par symétrie axiale"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="G21" data-titre="Transformer une figure par symétrie axiale"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+</tbody>
+</table>
+</div><div class="theme-wrap"><table class="avec-bandeau">
+<thead><tr class="bandeau"><th class="titre-feuille">\titres[\num_sheet]</th><th class="code" data-exo="P4.a1" data-titre="Résoudre un problème additif en une étape de composition d'états">P4.a1</th><th class="code" data-exo="P4.a2" data-titre="Résoudre un problème additif en une étape de transformation d'état">P4.a2</th><th class="code" data-exo="P4.a3" data-titre="Résoudre un problème additif en une étape de comparaisons d'états">P4.a3</th><th class="code" data-exo="P4.a4" data-titre="Résoudre un problème additif en une étape de composition de transformations">P4.a4</th><th class="code" data-exo="P4.a" data-titre="Résoudre un problème additif en une étape">P4.a</th></tr></thead>
+<tbody>
+<tr><td class="label entr-label">🏃 entraînements</td><td class="cell entr-cell" data-exo="P4.a1" data-titre="Résoudre un problème additif en une étape de composition d'états"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P4.a2" data-titre="Résoudre un problème additif en une étape de transformation d'état"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P4.a3" data-titre="Résoudre un problème additif en une étape de comparaisons d'états"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P4.a4" data-titre="Résoudre un problème additif en une étape de composition de transformations"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P4.a" data-titre="Résoudre un problème additif en une étape"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+<tr class="gap"><td colspan="6"></td></tr>
+<tr><td class="label eval-label">🏆 évaluations</td><td class="cell eval-cell" data-exo="P4.a1" data-titre="Résoudre un problème additif en une étape de composition d'états"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P4.a2" data-titre="Résoudre un problème additif en une étape de transformation d'état"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P4.a3" data-titre="Résoudre un problème additif en une étape de comparaisons d'états"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P4.a4" data-titre="Résoudre un problème additif en une étape de composition de transformations"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P4.a" data-titre="Résoudre un problème additif en une étape"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+</tbody>
+</table>
+</div><div class="theme-wrap"><table class="avec-bandeau">
+<thead><tr class="bandeau"><th class="titre-feuille">\titres[\num_sheet]</th><th class="code" data-exo="P4.m1" data-titre="Résoudre un problème multiplicatif en une étape de situation rectangulaire">P4.m1</th><th class="code" data-exo="P4.m2" data-titre="Résoudre un problème multiplicatif en une étape de comparaison multiplicative">P4.m2</th><th class="code" data-exo="P4.m3" data-titre="Résoudre un problème multiplicatif en une étape de produit cartésien">P4.m3</th><th class="code" data-exo="P4.m4" data-titre="Résoudre un problème multiplicatif en une étape de proportionnalité">P4.m4</th><th class="code" data-exo="P4.m" data-titre="Résoudre un problème multiplicatif en une étape">P4.m</th></tr></thead>
+<tbody>
+<tr><td class="label entr-label">🏃 entraînements</td><td class="cell entr-cell" data-exo="P4.m1" data-titre="Résoudre un problème multiplicatif en une étape de situation rectangulaire"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P4.m2" data-titre="Résoudre un problème multiplicatif en une étape de comparaison multiplicative"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P4.m3" data-titre="Résoudre un problème multiplicatif en une étape de produit cartésien"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P4.m4" data-titre="Résoudre un problème multiplicatif en une étape de proportionnalité"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P4.m" data-titre="Résoudre un problème multiplicatif en une étape"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+<tr class="gap"><td colspan="6"></td></tr>
+<tr><td class="label eval-label">🏆 évaluations</td><td class="cell eval-cell" data-exo="P4.m1" data-titre="Résoudre un problème multiplicatif en une étape de situation rectangulaire"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P4.m2" data-titre="Résoudre un problème multiplicatif en une étape de comparaison multiplicative"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P4.m3" data-titre="Résoudre un problème multiplicatif en une étape de produit cartésien"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P4.m4" data-titre="Résoudre un problème multiplicatif en une étape de proportionnalité"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P4.m" data-titre="Résoudre un problème multiplicatif en une étape"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+</tbody>
+</table>
+</div><div class="theme-wrap"><table class="avec-bandeau">
+<thead><tr class="bandeau"><th class="titre-feuille">\titres[\num_sheet]</th><th class="code" data-exo="P4" data-titre="Résoudre un problème en une étape">P4</th><th class="code" data-exo="P6.a" data-titre="Résoudre un problème de dénombrement">P6.a</th><th class="code" data-exo="P6.b" data-titre="Résoudre un problème d'optimisation">P6.b</th><th class="code" data-exo="P6.d" data-titre="Résoudre un problème algébrique">P6.d</th></tr></thead>
+<tbody>
+<tr><td class="label entr-label">🏃 entraînements</td><td class="cell entr-cell" data-exo="P4" data-titre="Résoudre un problème en une étape"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P6.a" data-titre="Résoudre un problème de dénombrement"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P6.b" data-titre="Résoudre un problème d'optimisation"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P6.d" data-titre="Résoudre un problème algébrique"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+<tr class="gap"><td colspan="5"></td></tr>
+<tr><td class="label eval-label">🏆 évaluations</td><td class="cell eval-cell" data-exo="P4" data-titre="Résoudre un problème en une étape"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P6.a" data-titre="Résoudre un problème de dénombrement"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P6.b" data-titre="Résoudre un problème d'optimisation"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P6.d" data-titre="Résoudre un problème algébrique"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+</tbody>
+</table>
+</div><div class="theme-wrap"><table class="avec-bandeau">
+<thead><tr class="bandeau"><th class="titre-feuille">\titres[\num_sheet]</th><th class="code" data-exo="P7" data-titre="Identifier des grandeurs et déterminer si elles sont proportionnelles">P7</th><th class="code" data-exo="P4.m4" data-titre="Résoudre un problème multiplicatif en une étape de proportionnalité">P4.m4</th><th class="code" data-exo="P8.a" data-titre="Résoudre un problème de proportionnalité par une méthode de multiplication ou division">P8.a</th><th class="code" data-exo="P8.b" data-titre="Résoudre un problème de proportionnalité par une méthode d'addition ou soustraction">P8.b</th><th class="code" data-exo="P8.c" data-titre="Résoudre un problème de proportionnalité par une méthode mixte">P8.c</th><th class="code" data-exo="P8.d" data-titre="Résoudre un problème de proportionnalité par une méthode de passage à l'unité">P8.d</th><th class="code" data-exo="P8" data-titre="Résoudre un problème de proportionnalité">P8</th></tr></thead>
+<tbody>
+<tr><td class="label entr-label">🏃 entraînements</td><td class="cell entr-cell" data-exo="P7" data-titre="Identifier des grandeurs et déterminer si elles sont proportionnelles"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P4.m4" data-titre="Résoudre un problème multiplicatif en une étape de proportionnalité"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P8.a" data-titre="Résoudre un problème de proportionnalité par une méthode de multiplication ou division"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P8.b" data-titre="Résoudre un problème de proportionnalité par une méthode d'addition ou soustraction"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P8.c" data-titre="Résoudre un problème de proportionnalité par une méthode mixte"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P8.d" data-titre="Résoudre un problème de proportionnalité par une méthode de passage à l'unité"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P8" data-titre="Résoudre un problème de proportionnalité"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+<tr class="gap"><td colspan="8"></td></tr>
+<tr><td class="label eval-label">🏆 évaluations</td><td class="cell eval-cell" data-exo="P7" data-titre="Identifier des grandeurs et déterminer si elles sont proportionnelles"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P4.m4" data-titre="Résoudre un problème multiplicatif en une étape de proportionnalité"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P8.a" data-titre="Résoudre un problème de proportionnalité par une méthode de multiplication ou division"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P8.b" data-titre="Résoudre un problème de proportionnalité par une méthode d'addition ou soustraction"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P8.c" data-titre="Résoudre un problème de proportionnalité par une méthode mixte"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P8.d" data-titre="Résoudre un problème de proportionnalité par une méthode de passage à l'unité"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P8" data-titre="Résoudre un problème de proportionnalité"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+</tbody>
+</table>
+</div><div class="theme-wrap"><table class="avec-bandeau">
+<thead><tr class="bandeau"><th class="titre-feuille">\titres[\num_sheet]</th><th class="code" data-exo="P14" data-titre="Comparer des probabilités">P14</th><th class="code" data-exo="P15" data-titre="Calculer une probabilité">P15</th></tr></thead>
+<tbody>
+<tr><td class="label entr-label">🏃 entraînements</td><td class="cell entr-cell" data-exo="P14" data-titre="Comparer des probabilités"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="P15" data-titre="Calculer une probabilité"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+<tr class="gap"><td colspan="3"></td></tr>
+<tr><td class="label eval-label">🏆 évaluations</td><td class="cell eval-cell" data-exo="P14" data-titre="Comparer des probabilités"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="P15" data-titre="Calculer une probabilité"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+</tbody>
+</table>
+</div><div class="theme-wrap"><table class="avec-bandeau">
+<thead><tr class="bandeau"><th class="titre-feuille">\titres[\num_sheet]</th><th class="code" data-exo="GM1" data-titre="Différencier périmètre et aire">GM1</th><th class="code" data-exo="GM2" data-titre="Comparer des périmètres">GM2</th><th class="code" data-exo="GM3" data-titre="Comparer des aires">GM3</th><th class="code" data-exo="GM4" data-titre="Calculer le périmètre d'un polygone">GM4</th><th class="code" data-exo="GM5" data-titre="Déterminer l'aire d'une figure à l'aide d'un pavage">GM5</th><th class="code" data-exo="GM6" data-titre="Calculer l'aire d'un rectangle">GM6</th><th class="code" data-exo="GM7" data-titre="Déterminer l'aire d'une figure complexe">GM7</th><th class="code" data-exo="GM8" data-titre="Convertir des unités d'aire">GM8</th><th class="code" data-exo="GM9" data-titre="Calculer le périmètre d'un disque">GM9</th></tr></thead>
+<tbody>
+<tr><td class="label entr-label">🏃 entraînements</td><td class="cell entr-cell" data-exo="GM1" data-titre="Différencier périmètre et aire"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="GM2" data-titre="Comparer des périmètres"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="GM3" data-titre="Comparer des aires"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="GM4" data-titre="Calculer le périmètre d'un polygone"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="GM5" data-titre="Déterminer l'aire d'une figure à l'aide d'un pavage"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="GM6" data-titre="Calculer l'aire d'un rectangle"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="GM7" data-titre="Déterminer l'aire d'une figure complexe"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="GM8" data-titre="Convertir des unités d'aire"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="GM9" data-titre="Calculer le périmètre d'un disque"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+<tr class="gap"><td colspan="10"></td></tr>
+<tr><td class="label eval-label">🏆 évaluations</td><td class="cell eval-cell" data-exo="GM1" data-titre="Différencier périmètre et aire"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="GM2" data-titre="Comparer des périmètres"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="GM3" data-titre="Comparer des aires"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="GM4" data-titre="Calculer le périmètre d'un polygone"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="GM5" data-titre="Déterminer l'aire d'une figure à l'aide d'un pavage"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="GM6" data-titre="Calculer l'aire d'un rectangle"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="GM7" data-titre="Déterminer l'aire d'une figure complexe"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="GM8" data-titre="Convertir des unités d'aire"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="GM9" data-titre="Calculer le périmètre d'un disque"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+</tbody>
+</table>
+</div><div class="theme-wrap"><table class="avec-bandeau">
+<thead><tr class="bandeau"><th class="titre-feuille">\titres[\num_sheet]</th><th class="code" data-exo="GM11" data-titre="Convertir des durées">GM11</th><th class="code" data-exo="GM12" data-titre="Calculer des durées">GM12</th></tr></thead>
+<tbody>
+<tr><td class="label entr-label">🏃 entraînements</td><td class="cell entr-cell" data-exo="GM11" data-titre="Convertir des durées"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="GM12" data-titre="Calculer des durées"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+<tr class="gap"><td colspan="3"></td></tr>
+<tr><td class="label eval-label">🏆 évaluations</td><td class="cell eval-cell" data-exo="GM11" data-titre="Convertir des durées"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="GM12" data-titre="Calculer des durées"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+</tbody>
+</table>
+</div><div class="theme-wrap"><table class="avec-bandeau">
+<thead><tr class="bandeau"><th class="titre-feuille">\titres[\num_sheet]</th><th class="code" data-exo="GM13" data-titre="Reconnaître qu’'un angle est aigu; obtus; droit ou plat">GM13</th><th class="code" data-exo="GM14" data-titre="Comparer des angles sans utiliser leur mesure">GM14</th><th class="code" data-exo="GM15" data-titre="Estimer la mesure d’un angle">GM15</th><th class="code" data-exo="GM16" data-titre="Nommer un angle">GM16</th><th class="code" data-exo="GM17" data-titre="Mesurer un angle avec le rapporteur">GM17</th><th class="code" data-exo="GM18" data-titre="Construire un angle avec le rapporteur">GM18</th></tr></thead>
+<tbody>
+<tr><td class="label entr-label">🏃 entraînements</td><td class="cell entr-cell" data-exo="GM13" data-titre="Reconnaître qu’'un angle est aigu; obtus; droit ou plat"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="GM14" data-titre="Comparer des angles sans utiliser leur mesure"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="GM15" data-titre="Estimer la mesure d’un angle"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="GM16" data-titre="Nommer un angle"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="GM17" data-titre="Mesurer un angle avec le rapporteur"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell entr-cell" data-exo="GM18" data-titre="Construire un angle avec le rapporteur"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+<tr class="gap"><td colspan="7"></td></tr>
+<tr><td class="label eval-label">🏆 évaluations</td><td class="cell eval-cell" data-exo="GM13" data-titre="Reconnaître qu’'un angle est aigu; obtus; droit ou plat"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="GM14" data-titre="Comparer des angles sans utiliser leur mesure"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="GM15" data-titre="Estimer la mesure d’un angle"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="GM16" data-titre="Nommer un angle"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="GM17" data-titre="Mesurer un angle avec le rapporteur"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td><td class="cell eval-cell" data-exo="GM18" data-titre="Construire un angle avec le rapporteur"><svg width="16" height="16"><circle cx="8" cy="8" r="8" fill="#D8D8DC"/></svg></td></tr>
+</tbody>
+</table>
+</div></div></div>
+<div id="bulle"></div>
+<script>
+(function(){
+  const bulle = document.getElementById('bulle');
+  bulle.style.display = 'block';
+  let minuteur = null;
+  document.addEventListener('click', function(e){
+    const cible = e.target.closest('[data-titre]');
+    if (!cible || !cible.dataset.titre){
+      bulle.classList.remove('visible');
+      return;
+    }
+    bulle.innerHTML = '<b>' + cible.dataset.exo + '</b>' + cible.dataset.titre;
+    bulle.classList.add('visible');
+    const r = cible.getBoundingClientRect();
+    bulle.style.left = Math.min(Math.max(8, r.left + r.width/2 - 145),
+                                window.innerWidth - 300) + 'px';
+    bulle.style.top = (r.bottom + 8) + 'px';
+    clearTimeout(minuteur);
+    minuteur = setTimeout(() => bulle.classList.remove('visible'), 4000);
+  });
+})();
+</script>
+</body></html>
