@@ -84,4 +84,17 @@ td.eval-cell{background:#EEF2FF}
 .val-mid{color:#F08000}
 
 body{padding:0;margin:0;background:transparent}
-</style></head><body></body></html>
+</style></head><body>
+<script>
+(function(){
+  function signaler(){
+    var h = Math.ceil(document.body.getBoundingClientRect().height);
+    parent.postMessage({source: "bilan", id: "cadre_conseil", hauteur: h}, "*");
+  }
+  window.addEventListener("load", signaler);
+  window.addEventListener("resize", signaler);
+  if (window.ResizeObserver) { new ResizeObserver(signaler).observe(document.body); }
+  setTimeout(signaler, 300);
+})();
+</script>
+</body></html>
